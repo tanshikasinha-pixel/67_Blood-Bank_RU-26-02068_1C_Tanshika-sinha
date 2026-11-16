@@ -1,0 +1,171 @@
+# Blood Bank Management System
+
+# Initial blood stock
+blood_stock = {
+    "A+": 10,
+    "A-": 0,
+    "B+": 5,
+    "B-": 0,
+    "AB+": 2,
+    "AB-": 0,
+    "O+": 8,
+    "O-": 0
+}
+
+# Valid blood groups
+valid_groups = ["A+", "A-", "B+", "B-", 
+                "AB+", "AB-", "O+", "O-"]
+
+# List to store donor records
+donors = []
+
+
+# Load donor records from file
+def load_donors():
+    try:
+        with open("donors.txt", "r") as file:
+            for line in file:
+                parts = line.strip().split("|")
+
+                if len(parts) == 3:
+                    name, group, units = parts
+                    donors.append({
+                        "name": name,
+                        "group": group,
+                        "units": int(units)
+                    })
+
+    except FileNotFoundError:
+        open("donors.txt", "w").close()
+
+
+# Add a new donor
+def add_donor():
+    name = input("Enter donor name: ").strip()
+
+    if not name:
+        print("Invalid donor name.")
+        return
+
+    group = input("Enter blood group: ").strip().upper()
+
+    if group not in valid_groups:
+        print("Invalid blood group. Valid groups: A+, A-, B+, B-, AB+, AB-, O+, O-.")
+        return
+
+    units = input("Enter number of units: ").strip()
+
+    if not units.isdigit() or int(units) <= 0:
+        print("Invalid units. Enter a positive whole number.")
+        return
+
+    units = int(units)
+
+    # Add donor to list
+    donor = {
+        "name": name,
+        "group": group,
+        "units": units
+    }
+
+    donors.append(donor)
+
+    # Save donor in file
+    with open("donors.txt", "a") as file:
+        file.write(f"{name}|{group}|{units}\n")
+
+    # Update blood stock
+    blood_stock[group] += units
+
+    print(f"Donor saved to donors.txt. Stock of {group} is now {blood_stock[group]} units.")
+
+
+# Issue blood
+def issue_blood():
+    group = input("Enter blood group: ").strip().upper()
+
+    if group not in valid_groups:
+        print("Invalid blood group. Valid groups: A+, A-, B+, B-, AB+, AB-, O+, O-.")
+        return
+
+    units = input("Enter number of units: ").strip()
+
+    if not units.isdigit() or int(units) <= 0:
+        print("Invalid units. Enter a positive whole number.")
+        return
+
+    units = int(units)
+
+    if blood_stock[group] >= units:
+        blood_stock[group] -= units
+
+        print(f"{units} unit(s) of {group} issued. Stock of {group} is now {blood_stock[group]} units.")
+    else:
+        print(f"Insufficient stock: only {blood_stock[group]} unit(s) of {group} available.")
+
+
+# View blood stock
+def view_stock():
+    print("\n----- BLOOD STOCK -----")
+
+    for group, units in blood_stock.items():
+        print(f"{group}: {units} units")
+
+
+# Search donors by blood group
+def search_donors():
+    group = input("Enter blood group to search: ").strip().upper()
+
+    if group not in valid_groups:
+        print("Invalid blood group. Valid groups: A+, A-, B+, B-, AB+, AB-, O+, O-.")
+        return
+
+    print(f"\nDonors with blood group {group}:")
+
+    count = 0
+
+    for donor in donors:
+        if donor["group"] == group:
+            count += 1
+            print(f"{count}. {donor['name']} - {donor['units']} unit(s)")
+
+    print(f"Total donors found: {count}")
+
+
+# Main menu
+def main():
+    load_donors()
+
+    while True:
+        print("\n===== BLOOD BANK MANAGEMENT SYSTEM =====")
+        print("1. Add donor")
+        print("2. Issue blood")
+        print("3. View stock")
+        print("4. Search donors")
+        print("5. Exit")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_donor()
+
+        elif choice == "2":
+            issue_blood()
+
+        elif choice == "3":
+            view_stock()
+
+        elif choice == "4":
+            search_donors()
+
+        elif choice == "5":
+            print("Thank you for using Blood Bank Management System.")
+            break
+
+        else:
+            print("Invalid menu choice. Please try again.")
+
+
+# Run the program
+if __name__ == "__main__":
+    main()
